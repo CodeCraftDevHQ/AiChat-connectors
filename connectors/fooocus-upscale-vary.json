@@ -1,0 +1,99 @@
+{
+  "_name": "Fooocus-API: Upscale / Vary",
+  "_baseUrl": "http://127.0.0.1:8888",
+  "kind": "image",
+  "_help": "Attach ONE image. Vary: the message can describe the image (optional).",
+  "auth": {
+    "type": "header",
+    "name": "X-API-KEY"
+  },
+  "models": {
+    "path": "/v1/engines/all-models",
+    "method": "GET",
+    "list": "$.model_filenames[*]"
+  },
+  "inputs": [
+    {
+      "id": "method",
+      "label": "Method",
+      "type": "select",
+      "options": [
+        "Upscale (2x)",
+        "Upscale (1.5x)",
+        "Upscale (Fast 2x)",
+        "Upscale (Custom)",
+        "Vary (Subtle)",
+        "Vary (Strong)"
+      ],
+      "default": "Upscale (2x)"
+    },
+    {
+      "id": "custom_scale",
+      "label": "Custom upscale factor (1.0-5.0)",
+      "type": "number",
+      "default": ""
+    },
+    {
+      "id": "performance",
+      "label": "Performance",
+      "type": "select",
+      "options": [
+        "Speed",
+        "Quality",
+        "Extreme Speed"
+      ],
+      "default": "Speed"
+    },
+    {
+      "id": "negative",
+      "label": "Negative prompt",
+      "type": "text",
+      "default": ""
+    }
+  ],
+  "request": {
+    "method": "POST",
+    "path": "/v2/generation/image-upscale-vary",
+    "body": {
+      "prompt": "{{prompt}}",
+      "negative_prompt": "{{input.negative}}",
+      "style_selections": [],
+      "performance_selection": "{{input.performance}}",
+      "image_number": 1,
+      "image_seed": -1,
+      "sharpness": 2,
+      "guidance_scale": 4,
+      "base_model_name": "{{model}}",
+      "refiner_model_name": "None",
+      "refiner_switch": 0.5,
+      "save_meta": true,
+      "save_extension": "png",
+      "require_base64": true,
+      "async_process": true,
+      "input_image": "{{image1_base64}}",
+      "uov_method": "{{input.method}}",
+      "upscale_value": "{{input.custom_scale}}"
+    }
+  },
+  "job": {
+    "id": "$.job_id",
+    "cancel": { "method": "POST", "path": "/v1/generation/stop" },
+    "poll": {
+      "method": "GET",
+      "path": "/v1/generation/query-job",
+      "query": { "job_id": "{{job}}", "require_step_preview": "false" },
+      "intervalSec": 1,
+      "timeoutSec": 1800,
+      "statusPath": "$.job_stage",
+      "done": [ "success" ],
+      "failed": [ "error" ],
+      "errorPath": "$.job_status",
+      "progressPath": "$.job_progress",
+      "progressMax": 100
+    },
+    "response": {
+      "results": [ { "from": "$.job_result[*].base64", "as": "base64", "mime": "image/png" } ]
+    }
+  },
+  "allowEmptyPrompt": true
+}

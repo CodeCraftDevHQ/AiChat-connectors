@@ -1,0 +1,242 @@
+{
+  "_name": "ComfyUI: Wan 2.2 (ویدیو)",
+  "_baseUrl": "http://127.0.0.1:8188",
+  "kind": "video",
+  "_help": "Local ComfyUI, Wan 2.2 5B text-to-video. The model box is the diffusion model file; needs several minutes on a mid-range GPU. Use the port ComfyUI listens on.",
+  "auth": {
+    "type": "none"
+  },
+  "models": {
+    "path": "/models/diffusion_models",
+    "method": "GET",
+    "list": "$[*]"
+  },
+  "inputs": [
+    {
+      "id": "width",
+      "label": "Width",
+      "type": "number",
+      "default": "608"
+    },
+    {
+      "id": "height",
+      "label": "Height",
+      "type": "number",
+      "default": "384"
+    },
+    {
+      "id": "length",
+      "label": "Frames (121 = 5 s at 24 fps)",
+      "type": "number",
+      "default": "121"
+    },
+    {
+      "id": "fps",
+      "label": "FPS",
+      "type": "number",
+      "default": "24"
+    },
+    {
+      "id": "steps",
+      "label": "Steps",
+      "type": "slider",
+      "min": 10,
+      "max": 50,
+      "step": 1,
+      "default": "20"
+    },
+    {
+      "id": "cfg",
+      "label": "CFG",
+      "type": "slider",
+      "min": 1,
+      "max": 10,
+      "step": 0.5,
+      "default": "5"
+    },
+    {
+      "id": "negative",
+      "label": "Negative prompt",
+      "type": "text",
+      "default": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
+    },
+    {
+      "id": "clip",
+      "label": "CLIP file",
+      "type": "text",
+      "default": "umt5_xxl_fp8_e4m3fn_scaled.safetensors"
+    },
+    {
+      "id": "vae",
+      "label": "VAE file",
+      "type": "text",
+      "default": "wan2.2_vae.safetensors"
+    }
+  ],
+  "request": {
+    "method": "POST",
+    "path": "/prompt",
+    "body": {
+      "prompt": {
+        "3": {
+          "inputs": {
+            "seed": "{{seed}}",
+            "steps": "{{input.steps}}",
+            "cfg": "{{input.cfg}}",
+            "sampler_name": "uni_pc",
+            "scheduler": "simple",
+            "denoise": 1,
+            "model": [
+              "48",
+              0
+            ],
+            "positive": [
+              "6",
+              0
+            ],
+            "negative": [
+              "7",
+              0
+            ],
+            "latent_image": [
+              "55",
+              0
+            ]
+          },
+          "class_type": "KSampler"
+        },
+        "6": {
+          "inputs": {
+            "text": "{{prompt}}",
+            "clip": [
+              "38",
+              0
+            ]
+          },
+          "class_type": "CLIPTextEncode"
+        },
+        "7": {
+          "inputs": {
+            "text": "{{input.negative}}",
+            "clip": [
+              "38",
+              0
+            ]
+          },
+          "class_type": "CLIPTextEncode"
+        },
+        "8": {
+          "inputs": {
+            "samples": [
+              "3",
+              0
+            ],
+            "vae": [
+              "39",
+              0
+            ]
+          },
+          "class_type": "VAEDecode"
+        },
+        "37": {
+          "inputs": {
+            "unet_name": "{{model}}",
+            "weight_dtype": "default"
+          },
+          "class_type": "UNETLoader"
+        },
+        "38": {
+          "inputs": {
+            "clip_name": "{{input.clip}}",
+            "type": "wan",
+            "device": "default"
+          },
+          "class_type": "CLIPLoader"
+        },
+        "39": {
+          "inputs": {
+            "vae_name": "{{input.vae}}"
+          },
+          "class_type": "VAELoader"
+        },
+        "48": {
+          "inputs": {
+            "shift": 8,
+            "model": [
+              "37",
+              0
+            ]
+          },
+          "class_type": "ModelSamplingSD3"
+        },
+        "55": {
+          "inputs": {
+            "width": "{{input.width}}",
+            "height": "{{input.height}}",
+            "length": "{{input.length}}",
+            "batch_size": 1,
+            "vae": [
+              "39",
+              0
+            ]
+          },
+          "class_type": "Wan22ImageToVideoLatent"
+        },
+        "57": {
+          "inputs": {
+            "fps": "{{input.fps}}",
+            "bit_depth": "auto",
+            "color_space": "sRGB",
+            "codec": "none",
+            "images": [
+              "8",
+              0
+            ]
+          },
+          "class_type": "CreateVideo"
+        },
+        "58": {
+          "inputs": {
+            "filename_prefix": "video/AiChat",
+            "format": "auto",
+            "format.codec": "auto",
+            "codec": "auto",
+            "video": [
+              "57",
+              0
+            ]
+          },
+          "class_type": "SaveVideo"
+        }
+      }
+    }
+  },
+  "job": {
+    "id": "$.prompt_id",
+    "cancel": { "method": "POST", "path": "/interrupt" },
+    "poll": {
+      "method": "GET",
+      "path": "/history/{{job}}",
+      "intervalSec": 5,
+      "timeoutSec": 3600,
+      "statusPath": "$.*.status.status_str",
+      "done": [
+        "success"
+      ],
+      "failed": [
+        "error"
+      ],
+      "errorPath": "$.*.status.messages"
+    },
+    "response": {
+      "type": "json",
+      "results": [
+        {
+          "from": "$.*.outputs.*.images[*]",
+          "as": "url",
+          "urlTemplate": "/view?filename={{item.filename|url}}&subfolder={{item.subfolder|url}}&type={{item.type|url}}"
+        }
+      ]
+    }
+  }
+}

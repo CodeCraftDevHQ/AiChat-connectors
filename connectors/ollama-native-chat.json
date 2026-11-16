@@ -1,0 +1,14 @@
+{
+  "_name": "Ollama (API بومی، چت)",
+  "_baseUrl": "http://localhost:11434",
+  "kind": "chat",
+  "auth": { "type": "none" },
+  "_help": "Ollama native chat API (http://localhost:11434). Install Ollama and pull a model first.",
+  "models": { "path": "/api/tags", "method": "GET", "list": "$.models[*].name" },
+  "request": {
+    "method": "POST",
+    "path": "/api/chat",
+    "body": { "model": "{{model}}", "messages": "{{messages_with_system}}", "stream": true }
+  },
+  "stream": { "format": "ndjson", "textPath": "$.message.content", "errorPath": "$.error" }
+}

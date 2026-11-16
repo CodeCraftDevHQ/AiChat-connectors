@@ -1,0 +1,17 @@
+{
+  "_name": "OpenAI Text-to-Speech (صوت)",
+  "_baseUrl": "https://api.openai.com/v1",
+  "kind": "audio",
+  "_help": "Text to speech with OpenAI. Needs an OpenAI API key; the reply is an audio file you can play.",
+  "auth": { "type": "bearer" },
+  "models": { "static": ["gpt-4o-mini-tts", "tts-1", "tts-1-hd"] },
+  "inputs": [
+    { "id": "voice", "label": "Voice", "type": "select", "options": ["alloy", "echo", "fable", "onyx", "nova", "shimmer"], "default": "alloy" }
+  ],
+  "request": {
+    "method": "POST",
+    "path": "/audio/speech",
+    "body": { "model": "{{model}}", "input": "{{prompt}}", "voice": "{{input.voice}}", "response_format": "mp3" }
+  },
+  "response": { "type": "binary", "mime": "audio/mpeg" }
+}

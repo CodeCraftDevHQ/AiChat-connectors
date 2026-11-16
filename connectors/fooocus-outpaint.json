@@ -1,0 +1,119 @@
+{
+  "_name": "Fooocus-API: Outpaint",
+  "_baseUrl": "http://127.0.0.1:8888",
+  "kind": "image",
+  "_help": "Attach ONE image. The message (optional) describes the new area.",
+  "auth": {
+    "type": "header",
+    "name": "X-API-KEY"
+  },
+  "models": {
+    "path": "/v1/engines/all-models",
+    "method": "GET",
+    "list": "$.model_filenames[*]"
+  },
+  "inputs": [
+    {
+      "id": "direction",
+      "label": "Direction",
+      "type": "select",
+      "options": [
+        "Left",
+        "Right",
+        "Top",
+        "Bottom"
+      ],
+      "default": "Left"
+    },
+    {
+      "id": "performance",
+      "label": "Performance",
+      "type": "select",
+      "options": [
+        "Speed",
+        "Quality",
+        "Extreme Speed"
+      ],
+      "default": "Speed"
+    },
+    {
+      "id": "negative",
+      "label": "Negative prompt",
+      "type": "text",
+      "default": ""
+    },
+    {
+      "id": "aspect",
+      "label": "Aspect ratio",
+      "type": "select",
+      "options": [
+        "704*1408",
+        "768*1344",
+        "832*1216",
+        "896*1152",
+        "1024*1024",
+        "1152*896",
+        "1216*832",
+        "1344*768",
+        "1408*704"
+      ],
+      "default": "1152*896"
+    }
+  ],
+  "request": {
+    "method": "POST",
+    "path": "/v2/generation/image-inpaint-outpaint",
+    "body": {
+      "prompt": "",
+      "negative_prompt": "{{input.negative}}",
+      "style_selections": [
+        "Fooocus V2",
+        "Fooocus Enhance",
+        "Fooocus Sharp"
+      ],
+      "performance_selection": "{{input.performance}}",
+      "aspect_ratios_selection": "{{input.aspect}}",
+      "image_number": 1,
+      "image_seed": -1,
+      "sharpness": 2,
+      "guidance_scale": 4,
+      "base_model_name": "{{model}}",
+      "refiner_model_name": "None",
+      "refiner_switch": 0.5,
+      "save_meta": true,
+      "save_extension": "png",
+      "require_base64": true,
+      "async_process": true,
+      "input_image": "{{image1_base64}}",
+      "outpaint_selections": [
+        "{{input.direction}}"
+      ],
+      "outpaint_distance_left": -1,
+      "outpaint_distance_right": -1,
+      "outpaint_distance_top": -1,
+      "outpaint_distance_bottom": -1,
+      "inpaint_additional_prompt": "{{prompt}}"
+    }
+  },
+  "job": {
+    "id": "$.job_id",
+    "cancel": { "method": "POST", "path": "/v1/generation/stop" },
+    "poll": {
+      "method": "GET",
+      "path": "/v1/generation/query-job",
+      "query": { "job_id": "{{job}}", "require_step_preview": "false" },
+      "intervalSec": 1,
+      "timeoutSec": 1800,
+      "statusPath": "$.job_stage",
+      "done": [ "success" ],
+      "failed": [ "error" ],
+      "errorPath": "$.job_status",
+      "progressPath": "$.job_progress",
+      "progressMax": 100
+    },
+    "response": {
+      "results": [ { "from": "$.job_result[*].base64", "as": "base64", "mime": "image/png" } ]
+    }
+  },
+  "allowEmptyPrompt": true
+}

@@ -1,0 +1,40 @@
+{
+  "_name": "ComfyUI (تصویر، گردش‌کار پیش‌فرض)",
+  "_baseUrl": "http://127.0.0.1:8188",
+  "kind": "image",
+  "_help": "Local ComfyUI, default text-to-image workflow. Use the port ComfyUI listens on (8188 or 8000).",
+  "auth": { "type": "none" },
+  "models": { "path": "/models/checkpoints", "method": "GET", "list": "$[*]" },
+  "inputs": [
+    { "id": "width", "label": "Width", "type": "number", "default": "512" },
+    { "id": "height", "label": "Height", "type": "number", "default": "512" },
+    { "id": "steps", "label": "Steps", "type": "number", "default": "20" },
+    { "id": "negative", "label": "Negative prompt", "type": "text", "default": "text, watermark" }
+  ],
+  "request": {
+    "method": "POST",
+    "path": "/prompt",
+    "body": {
+      "prompt": {
+        "3": { "class_type": "KSampler", "inputs": { "seed": "{{seed}}", "steps": "{{input.steps}}", "cfg": 8, "sampler_name": "euler", "scheduler": "normal", "denoise": 1, "model": ["4", 0], "positive": ["6", 0], "negative": ["7", 0], "latent_image": ["5", 0] } },
+        "4": { "class_type": "CheckpointLoaderSimple", "inputs": { "ckpt_name": "{{model}}" } },
+        "5": { "class_type": "EmptyLatentImage", "inputs": { "width": "{{input.width}}", "height": "{{input.height}}", "batch_size": 1 } },
+        "6": { "class_type": "CLIPTextEncode", "inputs": { "text": "{{prompt}}", "clip": ["4", 1] } },
+        "7": { "class_type": "CLIPTextEncode", "inputs": { "text": "{{input.negative}}", "clip": ["4", 1] } },
+        "8": { "class_type": "VAEDecode", "inputs": { "samples": ["3", 0], "vae": ["4", 2] } },
+        "9": { "class_type": "SaveImage", "inputs": { "filename_prefix": "AiChat", "images": ["8", 0] } }
+      }
+    }
+  },
+  "job": {
+    "id": "$.prompt_id",
+    "cancel": { "method": "POST", "path": "/interrupt" },
+    "poll": { "method": "GET", "path": "/history/{{job}}", "intervalSec": 2, "timeoutSec": 600 },
+    "response": {
+      "type": "json",
+      "results": [
+        { "from": "$.*.outputs.*.images[*]", "as": "url", "urlTemplate": "/view?filename={{item.filename|url}}&subfolder={{item.subfolder|url}}&type={{item.type|url}}" }
+      ]
+    }
+  }
+}

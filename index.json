@@ -1,0 +1,89 @@
+{
+  "name": "AiChat connectors",
+  "connectors": [
+    {
+      "name": "Fooocus-API (تصویر)",
+      "description": "Text to image. Optional LoRA.",
+      "author": "AiChat",
+      "url": "connectors/fooocus-text-to-image.json"
+    },
+    {
+      "name": "Fooocus-API: Upscale / Vary",
+      "description": "Attach ONE image. Vary: the message can describe the image (optional).",
+      "author": "AiChat",
+      "url": "connectors/fooocus-upscale-vary.json"
+    },
+    {
+      "name": "Fooocus-API: Image Prompt / FaceSwap",
+      "description": "Attach 1 or 2 reference images and write a prompt.",
+      "author": "AiChat",
+      "url": "connectors/fooocus-image-prompt-faceswap.json"
+    },
+    {
+      "name": "Fooocus-API: Outpaint",
+      "description": "Attach ONE image. The message (optional) describes the new area.",
+      "author": "AiChat",
+      "url": "connectors/fooocus-outpaint.json"
+    },
+    {
+      "name": "Fooocus-API: Inpaint",
+      "description": "Attach TWO images: first the original, second the mask (same size; WHITE = area to change, BLACK = keep). The message describes what should appear.",
+      "author": "AiChat",
+      "url": "connectors/fooocus-inpaint.json"
+    },
+    {
+      "name": "Fooocus-API: Describe image",
+      "description": "Attach ONE image; the reply is a text description (a prompt you can reuse).",
+      "author": "AiChat",
+      "url": "connectors/fooocus-describe-image.json"
+    },
+    {
+      "name": "Ollama (API بومی، چت)",
+      "description": "Ollama native chat API (http://localhost:11434). Install Ollama and pull a model first.",
+      "author": "AiChat",
+      "url": "connectors/ollama-native-chat.json"
+    },
+    {
+      "name": "چت با نمایش تفکر مدل (سبک DeepSeek)",
+      "description": "Chat API that streams a reasoning field (reasoning_content); the model's thinking is shown as a quoted block. Needs an API key.",
+      "author": "AiChat",
+      "url": "connectors/deepseek-style-reasoning-chat.json"
+    },
+    {
+      "name": "OpenAI Images (تصویر)",
+      "description": "OpenAI image generation. Needs an OpenAI API key.",
+      "author": "AiChat",
+      "url": "connectors/openai-images.json"
+    },
+    {
+      "name": "OpenAI Text-to-Speech (صوت)",
+      "description": "Text to speech with OpenAI. Needs an OpenAI API key; the reply is an audio file you can play.",
+      "author": "AiChat",
+      "url": "connectors/openai-tts.json"
+    },
+    {
+      "name": "AUTOMATIC1111 / Forge (تصویر)",
+      "description": "Local Stable Diffusion WebUI (start it with the --api option). Models are read from the server.",
+      "author": "AiChat",
+      "url": "connectors/automatic1111-forge.json"
+    },
+    {
+      "name": "ComfyUI (تصویر، گردش‌کار پیش‌فرض)",
+      "description": "Local ComfyUI, default text-to-image workflow. Use the port ComfyUI listens on (8188 or 8000).",
+      "author": "AiChat",
+      "url": "connectors/comfyui-default-workflow.json"
+    },
+    {
+      "name": "ComfyUI: Wan 2.2 (ویدیو)",
+      "description": "Local ComfyUI, Wan 2.2 5B text-to-video. The model box is the diffusion model file; needs several minutes on a mid-range GPU. Use the port ComfyUI listens on.",
+      "author": "AiChat",
+      "url": "connectors/comfyui-wan22-video.json"
+    },
+    {
+      "name": "کار ناهمزمان عمومی (ویدیو / سه‌بعدی)",
+      "description": "Edit the paths and field names to match your service. Submit a job, poll its status, then download the file.",
+      "author": "AiChat",
+      "url": "connectors/generic-async-job.json"
+    }
+  ]
+}
