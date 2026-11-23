@@ -1,0 +1,47 @@
+{
+  "_name": "Viggle Video",
+  "_baseUrl": "https://apis.viggle.ai/v1",
+  "kind": "video",
+  "_help": "Viggle H3 video generation (with audio). Base URL: https://apis.viggle.ai/v1 and your Viggle API key. Attach an image to use it as the first frame.",
+  "auth": { "type": "bearer" },
+  "inputs": [
+    { "id": "quality", "label": "Quality", "type": "select", "options": ["low", "high"], "default": "low" },
+    { "id": "duration", "label": "Duration (seconds)", "type": "slider", "min": 5, "max": 15, "step": 1, "default": 5 },
+    { "id": "resolution", "label": "Resolution", "type": "select", "options": ["480p", "768p", "1080p", "2k", "4k"], "default": "768p" },
+    { "id": "aspect", "label": "Aspect ratio", "type": "select", "options": ["16:9", "9:16", "1:1", "4:3", "3:4", "21:9"], "default": "16:9" },
+    { "id": "enhance", "label": "Enhance prompt (+1 credit/sec)", "type": "bool", "default": true },
+    { "id": "watermark", "label": "Watermark", "type": "bool", "default": false }
+  ],
+  "request": {
+    "method": "POST",
+    "path": "/videos",
+    "bodyType": "multipart",
+    "body": {
+      "prompt": "{{prompt}}",
+      "quality": "{{input.quality}}",
+      "duration_s": "{{input.duration}}",
+      "resolution": "{{input.resolution}}",
+      "aspect_ratio": "{{input.aspect}}",
+      "enhance": "{{input.enhance}}",
+      "watermark": "{{input.watermark}}",
+      "first_frame_image": { "file": "{{image1_base64}}", "mime": "{{image1_mime}}", "filename": "frame.png" }
+    }
+  },
+  "job": {
+    "id": "$.id",
+    "poll": {
+      "method": "GET",
+      "path": "/videos/{{job}}",
+      "intervalSec": 5,
+      "timeoutSec": 900,
+      "statusPath": "$.status",
+      "done": ["ready"],
+      "failed": ["failed", "cancelled"],
+      "errorPath": "$.error.message"
+    },
+    "response": {
+      "type": "json",
+      "results": [ { "from": "$.video_url", "as": "url", "mime": "video/mp4" } ]
+    }
+  }
+}
