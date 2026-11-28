@@ -1,0 +1,667 @@
+{
+  "_name": "Viggle",
+  "_baseUrl": "https://apis.viggle.ai/v1",
+  "kind": "file",
+  "_help": "Viggle: choose the mode, then fill the options below.",
+  "auth": {
+    "type": "bearer"
+  },
+  "modes": [
+    {
+      "id": "Image",
+      "kind": "image",
+      "_help": "Viggle Image: writes 1-6 images from your prompt. Optionally attach up to one reference image to the message. 1K costs 1 credit per image, 2K costs 2. This API has no model list; leave the model empty.",
+      "inputs": [
+        {
+          "id": "img_ratio",
+          "label": "Aspect ratio",
+          "type": "select",
+          "options": [
+            "1:1",
+            "16:9",
+            "9:16",
+            "4:3",
+            "3:4",
+            "3:2",
+            "2:3"
+          ],
+          "default": "1:1"
+        },
+        {
+          "id": "img_res",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "1K",
+            "2K"
+          ],
+          "default": "1K"
+        },
+        {
+          "id": "img_n",
+          "label": "Number of images (1-6)",
+          "type": "number",
+          "default": "1"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/images",
+        "bodyType": "multipart",
+        "body": {
+          "prompt": "{{prompt}}",
+          "aspect_ratio": "{{input.img_ratio}}",
+          "resolution": "{{input.img_res}}",
+          "n": "{{input.img_n}}",
+          "reference_image": {
+            "file": "{{image1_base64}}",
+            "mime": "{{image1_mime}}",
+            "filename": "reference.png"
+          }
+        }
+      },
+      "job": {
+        "id": "$.id",
+        "poll": {
+          "method": "GET",
+          "path": "/images/{{job}}",
+          "intervalSec": 4,
+          "timeoutSec": 600,
+          "statusPath": "$.status",
+          "done": [
+            "ready"
+          ],
+          "failed": [
+            "failed"
+          ],
+          "errorPath": "$.error.message"
+        },
+        "response": {
+          "type": "json",
+          "results": [
+            {
+              "from": "$.images[*].url",
+              "as": "url",
+              "mime": "image/png"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Video (H3: text / first frame)",
+      "kind": "video",
+      "_help": "Viggle H3 video. Write the prompt. Optionally attach one image: it becomes the first frame of the video. Price depends on quality, duration and resolution.",
+      "inputs": [
+        {
+          "id": "h3_quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "low",
+            "high",
+            "ultrafast"
+          ],
+          "default": "low"
+        },
+        {
+          "id": "h3_duration",
+          "label": "Duration (5-15 s)",
+          "type": "number",
+          "default": "5"
+        },
+        {
+          "id": "h3_res",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "480p",
+            "768p",
+            "1080p",
+            "2k",
+            "4k"
+          ],
+          "default": "768p"
+        },
+        {
+          "id": "h3_ratio",
+          "label": "Aspect ratio",
+          "type": "select",
+          "options": [
+            "16:9",
+            "9:16",
+            "1:1",
+            "4:3",
+            "3:4",
+            "21:9"
+          ],
+          "default": "16:9"
+        },
+        {
+          "id": "h3_enhance",
+          "label": "Enhance (+1 credit per second)",
+          "type": "bool",
+          "default": "true"
+        },
+        {
+          "id": "h3_watermark",
+          "label": "Watermark",
+          "type": "bool",
+          "default": "false"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/videos",
+        "bodyType": "multipart",
+        "body": {
+          "prompt": "{{prompt}}",
+          "quality": "{{input.h3_quality}}",
+          "duration_s": "{{input.h3_duration}}",
+          "resolution": "{{input.h3_res}}",
+          "aspect_ratio": "{{input.h3_ratio}}",
+          "enhance": "{{input.h3_enhance}}",
+          "watermark": "{{input.h3_watermark}}",
+          "first_frame_image": {
+            "file": "{{image1_base64}}",
+            "mime": "{{image1_mime}}",
+            "filename": "first-frame.png"
+          }
+        }
+      },
+      "job": {
+        "id": "$.id",
+        "poll": {
+          "method": "GET",
+          "path": "/videos/{{job}}",
+          "intervalSec": 6,
+          "timeoutSec": 1800,
+          "statusPath": "$.status",
+          "done": [
+            "ready"
+          ],
+          "failed": [
+            "failed",
+            "cancelled"
+          ],
+          "errorPath": "$.error.message"
+        },
+        "response": {
+          "type": "json",
+          "results": [
+            {
+              "from": "$.video_url",
+              "as": "url",
+              "mime": "video/mp4"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Video Remake (motion video + character)",
+      "kind": "video",
+      "_help": "Viggle Remake: attach a driving video (the motion) AND a character image to the same message; or write a public link to the driving video as the message. The character will perform the motion of the video.",
+      "allowEmptyPrompt": true,
+      "inputs": [
+        {
+          "id": "rmk_mode",
+          "label": "Enhance mode",
+          "type": "select",
+          "options": [
+            "planner",
+            "normal",
+            "agent"
+          ],
+          "default": "planner"
+        },
+        {
+          "id": "rmk_res",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "480p",
+            "768p",
+            "1080p",
+            "2k",
+            "4k"
+          ],
+          "default": "768p"
+        },
+        {
+          "id": "rmk_watermark",
+          "label": "Watermark",
+          "type": "bool",
+          "default": "false"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/videos",
+        "bodyType": "multipart",
+        "body": {
+          "driving_video": {
+            "file": "{{video1_base64}}",
+            "mime": "{{video1_mime}}",
+            "filename": "{{video1_name}}"
+          },
+          "driving_video_url": "{{prompt|http}}",
+          "character_image": {
+            "file": "{{image1_base64}}",
+            "mime": "{{image1_mime}}",
+            "filename": "character.png"
+          },
+          "enhance_mode": "{{input.rmk_mode}}",
+          "resolution": "{{input.rmk_res}}",
+          "watermark": "{{input.rmk_watermark}}"
+        }
+      },
+      "job": {
+        "id": "$.id",
+        "poll": {
+          "method": "GET",
+          "path": "/videos/{{job}}",
+          "intervalSec": 6,
+          "timeoutSec": 1800,
+          "statusPath": "$.status",
+          "done": [
+            "ready"
+          ],
+          "failed": [
+            "failed",
+            "cancelled"
+          ],
+          "errorPath": "$.error.message"
+        },
+        "response": {
+          "type": "json",
+          "results": [
+            {
+              "from": "$.video_url",
+              "as": "url",
+              "mime": "video/mp4"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Video Remix (character + motion)",
+      "kind": "video",
+      "_help": "Viggle Video Remix: attach a character image AND a motion video to the same message. You can keep the original background, use a solid color, or make it transparent.",
+      "allowEmptyPrompt": true,
+      "inputs": [
+        {
+          "id": "rmx_bg",
+          "label": "Background",
+          "type": "select",
+          "options": [
+            "original",
+            "solid",
+            "transparent"
+          ],
+          "default": "original"
+        },
+        {
+          "id": "rmx_color",
+          "label": "Solid color R,G,B (fill only when Background = solid, e.g. 0,255,0)",
+          "type": "text",
+          "default": ""
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/renders",
+        "bodyType": "multipart",
+        "body": {
+          "image": {
+            "file": "{{image1_base64}}",
+            "mime": "{{image1_mime}}",
+            "filename": "character.png"
+          },
+          "motion_video": {
+            "file": "{{video1_base64}}",
+            "mime": "{{video1_mime}}",
+            "filename": "{{video1_name}}"
+          },
+          "motion_video_url": "{{prompt|http}}",
+          "background_mode": "{{input.rmx_bg}}",
+          "bg_color": "{{input.rmx_color}}"
+        }
+      },
+      "job": {
+        "id": "$.id",
+        "poll": {
+          "method": "GET",
+          "path": "/videos/{{job}}",
+          "intervalSec": 6,
+          "timeoutSec": 1800,
+          "statusPath": "$.status",
+          "done": [
+            "ready"
+          ],
+          "failed": [
+            "failed",
+            "cancelled"
+          ],
+          "errorPath": "$.error.message"
+        },
+        "response": {
+          "type": "json",
+          "results": [
+            {
+              "from": "$.video_url",
+              "as": "url",
+              "mime": "video/mp4"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Video upscale (2x)",
+      "kind": "video",
+      "_help": "Upscales a video to 2x with FlashVSR. Attach the video (up to 100 MB, 0.5-600 s) or write a public link to it as the message. Costs 1 credit per second of video.",
+      "allowEmptyPrompt": true,
+      "inputs": [
+        {
+          "id": "up_watermark",
+          "label": "Watermark",
+          "type": "bool",
+          "default": "false"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/videos/super-resolution",
+        "bodyType": "multipart",
+        "body": {
+          "video": {
+            "file": "{{video1_base64}}",
+            "mime": "{{video1_mime}}",
+            "filename": "{{video1_name}}"
+          },
+          "video_url": "{{prompt|http}}",
+          "watermark": "{{input.up_watermark}}"
+        }
+      },
+      "job": {
+        "id": "$.id",
+        "poll": {
+          "method": "GET",
+          "path": "/videos/{{job}}",
+          "intervalSec": 6,
+          "timeoutSec": 1800,
+          "statusPath": "$.status",
+          "done": [
+            "ready"
+          ],
+          "failed": [
+            "failed",
+            "cancelled"
+          ],
+          "errorPath": "$.error.message"
+        },
+        "response": {
+          "type": "json",
+          "results": [
+            {
+              "from": "$.video_url",
+              "as": "url",
+              "mime": "video/mp4"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Text → 3D animation",
+      "kind": "file",
+      "_help": "Describes a movement in words (for example: a person waves hello and bows). Viggle makes a 3D skeleton animation. Flat price: 10 credits. The message is limited to 400 bytes (about 400 English letters).",
+      "inputs": [
+        {
+          "id": "t3d_format",
+          "label": "File format",
+          "type": "select",
+          "options": [
+            "fbx",
+            "glb"
+          ],
+          "default": "fbx"
+        },
+        {
+          "id": "t3d_duration",
+          "label": "Duration (3-60 s)",
+          "type": "number",
+          "default": "5"
+        },
+        {
+          "id": "t3d_guidance",
+          "label": "Prompt adherence (0-30)",
+          "type": "number",
+          "default": "5"
+        },
+        {
+          "id": "t3d_smooth",
+          "label": "Smooth the motion",
+          "type": "bool",
+          "default": "true"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/motions",
+        "bodyType": "json",
+        "body": {
+          "text": "{{prompt}}",
+          "duration_seconds": "{{input.t3d_duration}}",
+          "guidance_scale": "{{input.t3d_guidance}}",
+          "smooth": "{{input.t3d_smooth}}"
+        }
+      },
+      "job": {
+        "id": "$.id",
+        "poll": {
+          "method": "GET",
+          "path": "/motions/{{job}}/export?download_type={{input.t3d_format}}",
+          "intervalSec": 5,
+          "timeoutSec": 900,
+          "statusPath": "$.status",
+          "done": [
+            "ready"
+          ],
+          "failed": [
+            "failed",
+            "cancelled"
+          ],
+          "errorPath": "$.error.message"
+        },
+        "response": {
+          "type": "json",
+          "results": [
+            {
+              "from": "$.mixamo_url",
+              "as": "url",
+              "mime": "application/octet-stream",
+              "ext": "{{input.t3d_format}}"
+            },
+            {
+              "from": "$.metahuman_body_url",
+              "as": "url",
+              "mime": "application/octet-stream",
+              "ext": "{{input.t3d_format}}"
+            },
+            {
+              "from": "$.metahuman_url",
+              "as": "url",
+              "mime": "application/octet-stream",
+              "ext": "{{input.t3d_format}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Video → 3D animation",
+      "kind": "file",
+      "_help": "Extracts a 3D skeleton animation (FBX or GLB) from a video. Attach the video file (mp4 / mov / webm) to your message, or write a public direct link to the video as the message. Result: Mixamo, MetaHuman body and MetaHuman full rigs. Costs credits per second of video.",
+      "allowEmptyPrompt": true,
+      "inputs": [
+        {
+          "id": "v3d_format",
+          "label": "File format",
+          "type": "select",
+          "options": [
+            "fbx",
+            "glb"
+          ],
+          "default": "fbx"
+        },
+        {
+          "id": "v3d_smoothing",
+          "label": "Smooth the motion",
+          "type": "bool",
+          "default": "false"
+        },
+        {
+          "id": "v3d_fps",
+          "label": "Frames per second",
+          "type": "number",
+          "default": "25"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/motions",
+        "bodyType": "multipart",
+        "body": {
+          "motion_video": {
+            "file": "{{video1_base64}}",
+            "mime": "{{video1_mime}}",
+            "filename": "{{video1_name}}"
+          },
+          "motion_video_url": "{{prompt|http}}",
+          "type": "glb",
+          "enable_smoothing": "{{input.v3d_smoothing}}",
+          "target_fps": "{{input.v3d_fps}}"
+        }
+      },
+      "job": {
+        "id": "$.id",
+        "poll": {
+          "method": "GET",
+          "path": "/motions/{{job}}/export?download_type={{input.v3d_format}}",
+          "intervalSec": 5,
+          "timeoutSec": 900,
+          "statusPath": "$.status",
+          "done": [
+            "ready"
+          ],
+          "failed": [
+            "failed",
+            "cancelled"
+          ],
+          "errorPath": "$.error.message"
+        },
+        "response": {
+          "type": "json",
+          "results": [
+            {
+              "from": "$.mixamo_url",
+              "as": "url",
+              "mime": "application/octet-stream",
+              "ext": "{{input.v3d_format}}"
+            },
+            {
+              "from": "$.metahuman_body_url",
+              "as": "url",
+              "mime": "application/octet-stream",
+              "ext": "{{input.v3d_format}}"
+            },
+            {
+              "from": "$.metahuman_url",
+              "as": "url",
+              "mime": "application/octet-stream",
+              "ext": "{{input.v3d_format}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Image → 3D character",
+      "kind": "file",
+      "_help": "Turns a character image into a rigged 3D Gaussian-splat character (.vsplat). Attach the image to the message. Costs about 25-30 credits.",
+      "allowEmptyPrompt": true,
+      "inputs": [
+        {
+          "id": "c3d_joints",
+          "label": "Rig",
+          "type": "select",
+          "options": [
+            "body",
+            "full",
+            "expression"
+          ],
+          "default": "body"
+        },
+        {
+          "id": "c3d_enhance",
+          "label": "Enhance (+5 credits)",
+          "type": "bool",
+          "default": "true"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/characters",
+        "bodyType": "multipart",
+        "body": {
+          "image": {
+            "file": "{{image1_base64}}",
+            "mime": "{{image1_mime}}",
+            "filename": "character.png"
+          },
+          "type": "vsplat",
+          "joint_set": "{{input.c3d_joints}}",
+          "enhance": "{{input.c3d_enhance}}",
+          "render_thumbnail": "true"
+        }
+      },
+      "job": {
+        "id": "$.id",
+        "poll": {
+          "method": "GET",
+          "path": "/characters/{{job}}/export?download_type=vsplat",
+          "intervalSec": 6,
+          "timeoutSec": 1800,
+          "statusPath": "$.status",
+          "done": [
+            "ready"
+          ],
+          "failed": [
+            "failed",
+            "cancelled"
+          ],
+          "errorPath": "$.error.message"
+        },
+        "response": {
+          "type": "json",
+          "results": [
+            {
+              "from": "$.vsplat_url",
+              "as": "url",
+              "mime": "application/octet-stream",
+              "ext": "vsplat"
+            },
+            {
+              "from": "$.thumbnail_url",
+              "as": "url",
+              "mime": "image/png"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

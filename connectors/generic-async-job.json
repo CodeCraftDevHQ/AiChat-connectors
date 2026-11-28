@@ -1,17 +1,33 @@
 {
-  "_name": "کار ناهمزمان عمومی (ویدیو / سه‌بعدی)",
+  "_name": "Generic async job (template)",
   "_baseUrl": "https://api.example.com/v1",
   "kind": "video",
   "_help": "Edit the paths and field names to match your service. Submit a job, poll its status, then download the file.",
-  "auth": { "type": "bearer" },
-  "models": { "static": ["model-name"] },
+  "auth": {
+    "type": "bearer"
+  },
+  "models": {
+    "static": [
+      "model-name"
+    ]
+  },
   "inputs": [
-    { "id": "duration", "label": "Duration (s)", "type": "number", "default": "5" }
+    {
+      "id": "duration",
+      "label": "Duration (s)",
+      "type": "number",
+      "default": "5"
+    }
   ],
   "request": {
     "method": "POST",
     "path": "/generations",
-    "body": { "model": "{{model}}", "prompt": "{{prompt}}", "duration": "{{input.duration}}", "image": "{{image_dataurl}}" }
+    "body": {
+      "model": "{{model}}",
+      "prompt": "{{prompt}}",
+      "duration": "{{input.duration}}",
+      "image": "{{image_dataurl}}"
+    }
   },
   "job": {
     "id": "$.id",
@@ -21,13 +37,26 @@
       "intervalSec": 5,
       "timeoutSec": 900,
       "statusPath": "$.status",
-      "done": ["succeeded", "completed"],
-      "failed": ["failed", "error", "canceled"],
+      "done": [
+        "succeeded",
+        "completed"
+      ],
+      "failed": [
+        "failed",
+        "error",
+        "canceled"
+      ],
       "errorPath": "$.error"
     },
     "response": {
       "type": "json",
-      "results": [ { "from": "$.output.url", "as": "url", "mime": "video/mp4" } ]
+      "results": [
+        {
+          "from": "$.output.url",
+          "as": "url",
+          "mime": "video/mp4"
+        }
+      ]
     }
   }
 }

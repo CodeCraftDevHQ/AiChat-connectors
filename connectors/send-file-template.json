@@ -1,0 +1,33 @@
+{
+  "_name": "Send a file to an API (template)",
+  "_baseUrl": "https://api.example.com/v1",
+  "kind": "file",
+  "_help": "Template for APIs that take a file upload. Attach any file (video, audio, JSON, zip, ...) to the message. {{file1_*}} = first attached file, {{video1_*}} = first video, {{audio1_*}} = first audio; _base64, _mime, _name, _dataurl and _text (the content of a text / JSON file) are available.",
+  "auth": {
+    "type": "bearer"
+  },
+  "allowEmptyPrompt": true,
+  "request": {
+    "method": "POST",
+    "path": "/upload",
+    "bodyType": "multipart",
+    "body": {
+      "file": {
+        "file": "{{file1_base64}}",
+        "mime": "{{file1_mime}}",
+        "filename": "{{file1_name}}"
+      },
+      "note": "{{prompt}}"
+    }
+  },
+  "response": {
+    "type": "json",
+    "text": "$.message",
+    "results": [
+      {
+        "from": "$.url",
+        "as": "url"
+      }
+    ]
+  }
+}

@@ -1,15 +1,41 @@
 {
-  "_name": "AUTOMATIC1111 / Forge (تصویر)",
+  "_name": "AUTOMATIC1111 / Forge (image)",
   "_baseUrl": "http://127.0.0.1:7860",
   "kind": "image",
   "_help": "Local Stable Diffusion WebUI (start it with the --api option). Models are read from the server.",
-  "auth": { "type": "none" },
-  "models": { "path": "/sdapi/v1/sd-models", "method": "GET", "list": "$[*].title" },
+  "auth": {
+    "type": "none"
+  },
+  "models": {
+    "path": "/sdapi/v1/sd-models",
+    "method": "GET",
+    "list": "$[*].title"
+  },
   "inputs": [
-    { "id": "width", "label": "Width", "type": "number", "default": "512" },
-    { "id": "height", "label": "Height", "type": "number", "default": "512" },
-    { "id": "steps", "label": "Steps", "type": "number", "default": "20" },
-    { "id": "negative", "label": "Negative prompt", "type": "text", "default": "" }
+    {
+      "id": "width",
+      "label": "Width",
+      "type": "number",
+      "default": "512"
+    },
+    {
+      "id": "height",
+      "label": "Height",
+      "type": "number",
+      "default": "512"
+    },
+    {
+      "id": "steps",
+      "label": "Steps",
+      "type": "number",
+      "default": "20"
+    },
+    {
+      "id": "negative",
+      "label": "Negative prompt",
+      "type": "text",
+      "default": ""
+    }
   ],
   "request": {
     "method": "POST",
@@ -21,8 +47,19 @@
       "height": "{{input.height}}",
       "steps": "{{input.steps}}",
       "seed": -1,
-      "override_settings": { "sd_model_checkpoint": "{{model}}" }
+      "override_settings": {
+        "sd_model_checkpoint": "{{model}}"
+      }
     }
   },
-  "response": { "type": "json", "results": [ { "from": "$.images[*]", "as": "base64", "mime": "image/png" } ] }
+  "response": {
+    "type": "json",
+    "results": [
+      {
+        "from": "$.images[*]",
+        "as": "base64",
+        "mime": "image/png"
+      }
+    ]
+  }
 }

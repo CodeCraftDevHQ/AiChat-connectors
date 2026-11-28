@@ -1,0 +1,278 @@
+{
+  "_name": "ElevenLabs",
+  "_baseUrl": "https://api.elevenlabs.io",
+  "kind": "audio",
+  "_help": "ElevenLabs: choose the mode, then fill the options below.",
+  "auth": {
+    "type": "header",
+    "name": "xi-api-key"
+  },
+  "modes": [
+    {
+      "id": "Music",
+      "kind": "audio",
+      "_help": "ElevenLabs Music: describe the song you want (style, mood, instruments, lyrics ideas). Pick the model in the model menu (music_v1, music_v2, music_v2_5). Generation can take a minute. Music needs a paid plan.",
+      "models": {
+        "static": [
+          "music_v1",
+          "music_v2",
+          "music_v2_5"
+        ]
+      },
+      "inputs": [
+        {
+          "id": "mus_len",
+          "label": "Length in milliseconds (3000-600000, empty = let the model decide)",
+          "type": "text",
+          "default": "30000"
+        },
+        {
+          "id": "mus_instr",
+          "label": "Instrumental only",
+          "type": "bool",
+          "default": "false"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v1/music",
+        "query": {
+          "output_format": "mp3_44100_128"
+        },
+        "body": {
+          "prompt": "{{prompt}}",
+          "model_id": "{{model}}",
+          "music_length_ms": "{{input.mus_len}}",
+          "force_instrumental": "{{input.mus_instr}}"
+        }
+      },
+      "response": {
+        "type": "binary",
+        "mime": "audio/mpeg"
+      }
+    },
+    {
+      "id": "Text to speech",
+      "kind": "audio",
+      "_help": "ElevenLabs text to speech. The message is the text to read. Pick the model in the model menu and the voice in the Voice menu (both are loaded from your account when you save or press the fetch button).",
+      "models": {
+        "path": "/v1/models",
+        "method": "GET",
+        "list": "$[*].model_id",
+        "fallback": [
+          "eleven_multilingual_v2",
+          "eleven_flash_v2_5",
+          "eleven_turbo_v2_5",
+          "eleven_v3"
+        ]
+      },
+      "inputs": [
+        {
+          "id": "tts_voice",
+          "label": "Voice",
+          "type": "select",
+          "default": "21m00Tcm4TlvDq8ikWAM",
+          "optionsFrom": {
+            "path": "/v1/voices",
+            "method": "GET",
+            "list": "$.voices[*].voice_id",
+            "labels": "$.voices[*].name"
+          }
+        },
+        {
+          "id": "tts_lang",
+          "label": "Language code (e.g. en, fa; empty = auto)",
+          "type": "text",
+          "default": ""
+        },
+        {
+          "id": "tts_stability",
+          "label": "Stability (0-1)",
+          "type": "number",
+          "default": "0.5",
+          "min": 0,
+          "max": 1,
+          "step": 0.05
+        },
+        {
+          "id": "tts_similarity",
+          "label": "Similarity (0-1)",
+          "type": "number",
+          "default": "0.75",
+          "min": 0,
+          "max": 1,
+          "step": 0.05
+        },
+        {
+          "id": "tts_style",
+          "label": "Style exaggeration (0-1)",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 1,
+          "step": 0.05
+        },
+        {
+          "id": "tts_speed",
+          "label": "Speed (0.7-1.2)",
+          "type": "number",
+          "default": "1",
+          "min": 0.7,
+          "max": 1.2,
+          "step": 0.05
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v1/text-to-speech/{{input.tts_voice}}",
+        "query": {
+          "output_format": "mp3_44100_128"
+        },
+        "body": {
+          "text": "{{prompt}}",
+          "model_id": "{{model}}",
+          "language_code": "{{input.tts_lang}}",
+          "voice_settings": {
+            "stability": "{{input.tts_stability}}",
+            "similarity_boost": "{{input.tts_similarity}}",
+            "style": "{{input.tts_style}}",
+            "speed": "{{input.tts_speed}}"
+          }
+        }
+      },
+      "response": {
+        "type": "binary",
+        "mime": "audio/mpeg"
+      }
+    },
+    {
+      "id": "Sound effects",
+      "kind": "audio",
+      "_help": "ElevenLabs sound effects: describe a sound (for example: heavy rain on a tin roof). Models: eleven_text_to_sound_v2 / v3.",
+      "models": {
+        "static": [
+          "eleven_text_to_sound_v2",
+          "eleven_text_to_sound_v3"
+        ]
+      },
+      "inputs": [
+        {
+          "id": "sfx_dur",
+          "label": "Duration in seconds (0.5-30, empty = automatic)",
+          "type": "text",
+          "default": ""
+        },
+        {
+          "id": "sfx_infl",
+          "label": "Prompt influence (0-1)",
+          "type": "number",
+          "default": "0.3",
+          "min": 0,
+          "max": 1,
+          "step": 0.05
+        },
+        {
+          "id": "sfx_loop",
+          "label": "Seamless loop",
+          "type": "bool",
+          "default": "false"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v1/sound-generation",
+        "query": {
+          "output_format": "mp3_44100_128"
+        },
+        "body": {
+          "text": "{{prompt}}",
+          "model_id": "{{model}}",
+          "duration_seconds": "{{input.sfx_dur}}",
+          "prompt_influence": "{{input.sfx_infl}}",
+          "loop": "{{input.sfx_loop}}"
+        }
+      },
+      "response": {
+        "type": "binary",
+        "mime": "audio/mpeg"
+      }
+    },
+    {
+      "id": "Speech to text",
+      "kind": "file",
+      "allowEmptyPrompt": true,
+      "_help": "ElevenLabs speech to text (Scribe): attach an audio or video file. The transcript comes back as text. Pick scribe_v1 or scribe_v2 in the model menu.",
+      "models": {
+        "static": [
+          "scribe_v2",
+          "scribe_v1"
+        ]
+      },
+      "inputs": [
+        {
+          "id": "stt_lang",
+          "label": "Language code (empty = detect automatically)",
+          "type": "text",
+          "default": ""
+        },
+        {
+          "id": "stt_diarize",
+          "label": "Mark who is speaking",
+          "type": "bool",
+          "default": "false"
+        },
+        {
+          "id": "stt_events",
+          "label": "Tag sounds (laughter, music...)",
+          "type": "bool",
+          "default": "true"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v1/speech-to-text",
+        "bodyType": "multipart",
+        "body": {
+          "model_id": "{{model}}",
+          "file": {
+            "file": "{{file1_base64}}",
+            "mime": "{{file1_mime}}",
+            "filename": "{{file1_name}}"
+          },
+          "language_code": "{{input.stt_lang}}",
+          "diarize": "{{input.stt_diarize}}",
+          "tag_audio_events": "{{input.stt_events}}"
+        }
+      },
+      "response": {
+        "type": "json",
+        "text": "$.text"
+      }
+    },
+    {
+      "id": "Voice isolator (remove noise)",
+      "kind": "audio",
+      "allowEmptyPrompt": true,
+      "_help": "ElevenLabs voice isolator: attach an audio file; you get back the clean voice without background noise or music.",
+      "models": {
+        "static": []
+      },
+      "request": {
+        "method": "POST",
+        "path": "/v1/audio-isolation",
+        "bodyType": "multipart",
+        "body": {
+          "audio": {
+            "file": "{{file1_base64}}",
+            "mime": "{{file1_mime}}",
+            "filename": "{{file1_name}}"
+          }
+        }
+      },
+      "response": {
+        "type": "binary",
+        "mime": "audio/mpeg"
+      }
+    }
+  ]
+}

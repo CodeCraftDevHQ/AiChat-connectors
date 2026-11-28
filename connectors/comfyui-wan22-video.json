@@ -1,5 +1,5 @@
 {
-  "_name": "ComfyUI: Wan 2.2 (ویدیو)",
+  "_name": "ComfyUI: Wan 2.2 (video)",
   "_baseUrl": "http://127.0.0.1:8188",
   "kind": "video",
   "_help": "Local ComfyUI, Wan 2.2 5B text-to-video. The model box is the diffusion model file; needs several minutes on a mid-range GPU. Use the port ComfyUI listens on.",
@@ -213,7 +213,10 @@
   },
   "job": {
     "id": "$.prompt_id",
-    "cancel": { "method": "POST", "path": "/interrupt" },
+    "cancel": {
+      "method": "POST",
+      "path": "/interrupt"
+    },
     "poll": {
       "method": "GET",
       "path": "/history/{{job}}",

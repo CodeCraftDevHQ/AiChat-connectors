@@ -1,14 +1,24 @@
 {
-  "_name": "چت با نمایش تفکر مدل (سبک DeepSeek)",
+  "_name": "Reasoning chat (DeepSeek-style)",
   "_baseUrl": "https://api.deepseek.com/v1",
   "kind": "chat",
   "_help": "Chat API that streams a reasoning field (reasoning_content); the model's thinking is shown as a quoted block. Needs an API key.",
-  "auth": { "type": "bearer" },
-  "models": { "path": "/models", "method": "GET", "list": "$.data[*].id" },
+  "auth": {
+    "type": "bearer"
+  },
+  "models": {
+    "path": "/models",
+    "method": "GET",
+    "list": "$.data[*].id"
+  },
   "request": {
     "method": "POST",
     "path": "/chat/completions",
-    "body": { "model": "{{model}}", "messages": "{{messages_with_system}}", "stream": true }
+    "body": {
+      "model": "{{model}}",
+      "messages": "{{messages_with_system}}",
+      "stream": true
+    }
   },
   "stream": {
     "format": "sse",
